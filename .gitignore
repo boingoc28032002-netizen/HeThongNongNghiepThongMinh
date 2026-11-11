@@ -1,0 +1,23 @@
+# Du lieu sinh ra khi chay mo phong
+irrigation_data/
+*.db
+*.sqlite
+*.log
+
+# Python
+__pycache__/
+*.pyc
+
+# Proteus: file tam / sao luu
+*.pdsbak
+*.pdsprj.bak
+*.workspace
+Backup*/
+*.cdb.bak
+
+# Editor / he dieu hanh
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+irrigation*_log.txt

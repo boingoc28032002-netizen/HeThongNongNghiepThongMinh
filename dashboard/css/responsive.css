@@ -1,0 +1,12 @@
+/* Responsive: phai nap SAU cac file con lai de ghi de dung thu tu */
+@media(max-width:1200px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}.zones{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .nav{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:12px 16px}
+  .nav-brand{padding:0}.nav-h,.sys{display:none}
+  .nav-list{display:flex;gap:4px;overflow-x:auto;order:3;width:100%}
+  .nav-i{white-space:nowrap;margin:0;padding:9px 12px}
+  .nav-user{margin:0 0 0 auto;padding:6px 10px}
+  .content{padding:20px 16px 28px}
+}
+@media(max-width:640px){.kpis,.zones{grid-template-columns:1fr}.top h1{font-size:22px}.main{gap:24px}}

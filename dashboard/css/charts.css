@@ -1,0 +1,20 @@
+/* Bieu do duong, thanh ngang, donut */
+.chartwrap{position:relative}
+.chartwrap svg{width:100%;height:auto;display:block}
+.tip{position:absolute;pointer-events:none;background:#12233b;color:#fff;border-radius:10px;padding:8px 12px;font-size:12px;line-height:1.55;display:none;white-space:nowrap;z-index:3;box-shadow:0 6px 18px rgba(15,39,66,.25)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-size:12.5px;color:var(--muted);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+
+/* thanh ngang */
+.hbar{display:grid;grid-template-columns:62px 1fr auto;gap:12px;align-items:center;margin:16px 0;font-weight:500}
+.hbar .track{height:10px;background:#eaeff6;border-radius:99px;overflow:hidden}
+.hbar .fl{height:100%;border-radius:99px;transition:width .5s}
+.hbar b{font-variant-numeric:tabular-nums;min-width:64px;text-align:right;font-weight:600}
+.hint{color:var(--muted);font-size:12.5px}
+
+/* donut */
+.donutbox{display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center}
+.dleg{display:flex;flex-direction:column;gap:10px;min-width:170px;font-size:13px}
+.dleg div{display:flex;align-items:center;gap:8px}
+.dleg i{width:10px;height:10px;border-radius:50%;flex:none}
+.dleg b{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:600}

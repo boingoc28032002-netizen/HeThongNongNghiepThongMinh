@@ -1,0 +1,89 @@
+/* Trang dang dang nhap / dang ky */
+.login-page{
+  --g1:#1b8a2d; --g2:#2aa63a; --gdeep:#17702a;
+  min-height:100vh; min-height:100dvh; margin:0; background:#7cc4f2 url(../assets/login-bg.svg) center bottom/cover no-repeat;
+  display:grid; place-items:center; overflow-x:hidden; position:relative;
+}
+.scene{position:fixed; inset:0; pointer-events:none}
+
+/* Bieu tuong IoT ben phai */
+.hexes{position:absolute; right:3.5vw; top:19%; width:min(24vw,360px); aspect-ratio:360/330}
+.hexlines{position:absolute; inset:0; width:100%; height:100%}
+.hex{position:absolute; width:30%; aspect-ratio:1/1.12; display:grid; place-items:center; color:#fff;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  background:linear-gradient(160deg,rgba(255,255,255,.6),rgba(150,225,255,.28)); filter:drop-shadow(0 4px 10px rgba(30,120,190,.25))}
+.hex::after{content:""; position:absolute; inset:2px; clip-path:inherit; background:rgba(120,205,250,.28)}
+.hex svg{position:relative; z-index:1; width:46%; height:46%; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+.h-wifi{left:17%; top:0; transform:translateX(0)} .h-drop{left:0; top:27%} .h-temp{left:72%; top:27%} .h-plant{left:36%; top:49%; width:34%}
+
+/* The dang nhap */
+.wrap{position:relative; z-index:1; width:100%; box-sizing:border-box; padding:24px 16px; display:grid; grid-template-columns:minmax(0,1fr); justify-items:center; align-items:center}
+.card{width:min(100%,660px); box-sizing:border-box; padding:22px 36px 20px; border-radius:30px;
+  background:linear-gradient(180deg,rgba(255,255,255,.93),rgba(246,252,243,.86));
+  border:1px solid rgba(255,255,255,.8); box-shadow:0 24px 60px rgba(20,80,40,.28),0 2px 0 rgba(255,255,255,.7) inset;
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); text-align:center}
+.logo{height:134px; display:grid; place-items:center}
+h1{margin:6px 0 4px; white-space:nowrap; font-size:clamp(1rem,4.6vw,1.6rem); line-height:1.2; font-weight:700; color:var(--g1); letter-spacing:.2px}
+.sub{margin:0 0 18px; display:flex; align-items:center; gap:12px; color:#1c7a2c; font-style:italic; font-size:1.02rem}
+.sub::before,.sub::after{content:""; flex:1; height:1px; background:linear-gradient(90deg,transparent,#8cc79a)}
+.sub::after{background:linear-gradient(270deg,transparent,#8cc79a)}
+
+/* Tab Dang nhap / Dang ky */
+.tabs2{display:grid; grid-template-columns:1fr 1fr; padding:0; margin-bottom:18px; border:1px solid #d4dcd6; border-radius:14px; background:rgba(255,255,255,.7); overflow:hidden}
+.tabs2 .t{display:flex; align-items:center; justify-content:center; gap:10px; height:54px; border:0; background:transparent; color:#2b3a30; font-weight:500; font-size:1.08rem; cursor:pointer; border-radius:12px; transition:background .18s,color .18s}
+.tabs2 .t svg{width:24px; height:24px}
+.tabs2 .t.on{background:linear-gradient(180deg,var(--g2),var(--gdeep)); color:#fff; box-shadow:0 3px 8px rgba(23,112,42,.35)}
+.tabs2 .t:not(.on):hover{background:rgba(42,166,58,.08)}
+
+/* O nhap */
+.field{position:relative; display:flex; align-items:center; height:56px; margin-bottom:14px; border:1px solid #d0d6d2; border-radius:14px; background:rgba(255,255,255,.92); text-align:left; transition:border-color .15s,box-shadow .15s}
+.field[hidden]{display:none}
+.field:focus-within{border-color:var(--g2); box-shadow:0 0 0 3px rgba(42,166,58,.2)}
+.field .lead{width:24px; height:24px; margin:0 14px 0 18px; color:#4b5563; flex:none}
+.field input{flex:1; min-width:0; height:100%; border:0; background:transparent; font:inherit; font-size:1.05rem; color:var(--ink); outline:0; padding:0 4px 0 0}
+.field input::placeholder{color:#7b8288}
+.eye{width:44px; height:44px; margin-right:8px; border:0; background:transparent; color:#374151; cursor:pointer; border-radius:10px; display:grid; place-items:center}
+.eye svg{width:24px; height:24px}
+.eye .slash{opacity:1} .eye.shown .slash{opacity:0}
+.eye:hover{background:rgba(0,0,0,.05)} .eye:focus-visible{outline:2px solid var(--g2)}
+
+/* Nho tai khoan / quen mat khau */
+.opts{display:flex; align-items:center; justify-content:space-between; margin:2px 2px 16px; font-size:.98rem}
+.opts[hidden]{display:none}
+.opts a{color:#1d2a22; text-decoration:none} .opts a:hover{color:var(--g1); text-decoration:underline}
+.chk{display:inline-flex; align-items:center; gap:10px; cursor:pointer; color:#1d2a22; position:relative}
+.chk input{position:absolute; opacity:0; width:22px; height:22px; margin:0; cursor:pointer}
+.chk .box{width:22px; height:22px; border:1px solid #9aa3a0; border-radius:5px; background:#fff; display:grid; place-items:center; transition:.15s}
+.chk input:checked+.box{background:var(--g2); border-color:var(--g2)}
+.chk input:checked+.box::after{content:""; width:6px; height:11px; border:solid #fff; border-width:0 2.5px 2.5px 0; transform:rotate(45deg) translate(-1px,-1px)}
+.chk input:focus-visible+.box{outline:2px solid var(--g2); outline-offset:2px}
+.forgot{margin:-6px 0 14px; padding:10px 14px; border-radius:10px; background:#eef8ef; border:1px solid #cfe8d3; color:#2b4a33; font-size:.9rem; line-height:1.45; text-align:left}
+.forgot[hidden]{display:none}
+
+.msg{display:none; margin:-2px 0 12px; padding:10px 14px; border-radius:10px; font-size:.95rem; text-align:left}
+.msg.show{display:block}
+.msg.err{background:#fdecec; color:#b42318; border:1px solid #f6c7c3}
+
+/* Nut chinh */
+.go{width:100%; height:58px; display:flex; align-items:center; justify-content:center; gap:12px; border:0; border-radius:14px; cursor:pointer; color:#fff; font-size:1.2rem; font-weight:500;
+  background:linear-gradient(180deg,#2db23d,#178a2b); box-shadow:0 6px 14px rgba(23,138,43,.35),0 1px 0 rgba(255,255,255,.35) inset; transition:filter .15s,transform .05s}
+.go svg{width:26px; height:26px}
+.go:hover:not(:disabled){filter:brightness(1.06)} .go:active:not(:disabled){transform:translateY(1px)}
+.go:focus-visible{outline:3px solid rgba(42,166,58,.45); outline-offset:2px}
+.go:disabled{cursor:wait; filter:saturate(.7)}
+.spin{display:none; width:18px; height:18px; border:2.5px solid rgba(255,255,255,.45); border-top-color:#fff; border-radius:50%; animation:sp .7s linear infinite}
+.go.busy .spin{display:block}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.foot{margin-top:16px; display:grid; justify-items:center; gap:4px; color:#1c6b2b; font-size:.95rem}
+.foot .fl{display:flex; align-items:center; gap:10px; width:100%}
+.foot .fl i{flex:1; height:1px; background:linear-gradient(90deg,transparent,#cfe3d3)} .foot .fl i:last-child{background:linear-gradient(270deg,transparent,#cfe3d3)}
+.foot svg{width:26px; height:26px}
+
+@media(max-width:1100px){.hexes{display:none}}
+@media(max-width:520px){
+  .card{padding:18px 18px 16px; border-radius:24px} h1{white-space:normal}
+  .logo{height:108px} .logo svg{width:120px; height:106px}
+  .tabs2 .t{height:48px; font-size:1rem} .field{height:52px}
+}
+@media(prefers-reduced-motion:reduce){.spin{animation:none}}

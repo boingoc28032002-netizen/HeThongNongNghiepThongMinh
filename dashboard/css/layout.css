@@ -1,0 +1,96 @@
+/* Bo cuc trang tong quan: thanh ben (sidebar), tieu de, noi dung chinh */
+:root{
+  --bg:#f2f5fa; --card:#ffffff; --ink:#12233b; --muted:#7b8798; --line:#e8edf4;
+  --blue:#2f7df0; --green:#1fb36d; --amber:#f0a030; --red:#e5484d; --teal:#0f766e;
+  --accent:var(--blue);
+  --navy:#0f2742; --navy2:#173556;
+  --r:14px;
+  --shadow:0 1px 2px rgba(15,39,66,.04),0 6px 18px rgba(15,39,66,.05);
+}
+html{scroll-behavior:smooth}
+body{font-family:Inter,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+
+.app{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:100vh}
+
+/* ---------- Thanh ben ---------- */
+.nav{background:var(--navy);color:#c5d2e2;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:22px 16px 16px}
+.nav-brand{display:flex;align-items:center;gap:12px;padding:0 6px 28px}
+.nav-brand .logo{width:42px;height:42px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;flex:none}
+.nav-brand .logo .ic{width:22px;height:22px;fill:#fff;stroke:#fff}
+.nav-brand b{display:block;color:#fff;font-size:14px;white-space:nowrap;font-weight:700;letter-spacing:.02em}
+.nav-brand small{display:block;font-size:10px;letter-spacing:.14em;color:#8aa0ba;margin-top:2px}
+.nav-h{font-size:10.5px;letter-spacing:.14em;color:#6f87a3;font-weight:600;padding:0 12px;margin:0 0 10px}
+.nav-h2{margin-top:26px}
+.nav-i{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;color:#c5d2e2;text-decoration:none;font-weight:500;margin-bottom:4px;transition:background .2s,color .2s}
+.nav-i .ic{width:20px;height:20px}
+.nav-i:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-i.active{background:linear-gradient(90deg,#1d4e90,#2a63b3);color:#fff;box-shadow:inset 3px 0 0 #6ab0ff}
+.nav-i:focus-visible,.logout:focus-visible{outline:2px solid #6ab0ff;outline-offset:2px}
+.sys{display:flex;align-items:center;gap:10px;padding:4px 12px;font-size:13px;color:#c5d2e2}
+.sys .sd{width:8px;height:8px;border-radius:50%;background:#7b8798;flex:none}
+.sys .s-on,.sys .s-off{display:none}
+body:has(#pDev.good) .sys .sd{background:#2ed17f;box-shadow:0 0 0 3px rgba(46,209,127,.2)}
+body:has(#pDev.bad) .sys .sd{background:#ff6b6b}
+body:has(#pDev.good) .sys .s-na,body:has(#pDev.bad) .sys .s-na{display:none}
+body:has(#pDev.good) .sys .s-on,body:has(#pDev.bad) .sys .s-off{display:inline}
+.nav-user{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--navy2)}
+.nav-user .av{width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;flex:none}
+.nav-user .av .ic{width:17px;height:17px}
+.nav-user b{display:block;color:#fff;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
+.logout{background:none;border:0;padding:0;margin-top:1px;font-size:11.5px;color:#8fa6c1;cursor:pointer}
+.logout:hover{color:#fff;text-decoration:underline}
+
+/* ---------- Noi dung ---------- */
+.content{min-width:0;padding:26px 32px 34px;max-width:1440px;width:100%}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.top h1{font-size:26px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em}
+.top .sub{font-size:11.5px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.top .sub b{color:var(--ink);font-weight:600;text-transform:none;letter-spacing:0;font-size:12.5px}
+.top-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.pill{display:inline-flex;align-items:center;gap:9px;padding:10px 16px;border:1px solid var(--line);border-radius:10px;font-size:13px;font-weight:500;background:#fff;box-shadow:var(--shadow)}
+.pill .dot{width:9px;height:9px;border-radius:50%;background:#aab4c3}
+.pill.good .dot{background:var(--green)} .pill.bad .dot{background:var(--red)}
+.iconbtn{width:40px;height:40px;border:1px solid var(--line);background:#fff;border-radius:10px;display:grid;place-items:center;cursor:pointer;color:var(--ink);box-shadow:var(--shadow)}
+.iconbtn .ic{width:19px;height:19px}
+.iconbtn:hover{background:#f6f8fc}
+.iconbtn:focus-visible,select:focus-visible,.tab:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+.main{display:flex;flex-direction:column;gap:30px;min-width:0}
+section[id]{scroll-margin-top:16px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;border:1px solid #edf1f7}
+.banner{display:none;background:#fff7ea;border:1px solid #fadfb2;border-left:5px solid var(--amber);padding:12px 16px;border-radius:10px}
+body.stale .banner{display:block}
+body.stale .live{opacity:.55}
+
+.sec-h{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+h2.sec{font-size:18px;font-weight:700;margin:0 0 3px}
+.sub2{margin:0;color:var(--muted);font-size:12.5px}
+.sec-tools{display:flex;gap:10px;flex-wrap:wrap}
+
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.grid2{align-items:stretch;display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:18px}
+
+footer{color:var(--muted);font-size:11.5px;padding:0 2px;text-align:right;line-height:1.6}
+.grid2.even{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+@media(max-width:1200px){.grid2.even{grid-template-columns:1fr}}
+
+/* ---------- Moi muc menu la mot trang rieng, khong cuon ---------- */
+[data-pages][hidden]{display:none!important}
+@media(min-width:901px){
+  html,body{height:100%;overflow:hidden}
+  html{scroll-behavior:auto}
+  .app{height:100vh;min-height:0}
+  .content{height:100vh;display:flex;flex-direction:column;min-height:0;padding:20px 28px 16px;max-width:none}
+  .top{margin-bottom:14px}
+  .top h1{font-size:24px;margin-bottom:4px}
+  .main{flex:1;min-height:0;gap:18px;overflow:hidden auto}   /* chi cuon khi man hinh qua thap */
+  .kpi{padding:14px 18px 12px}
+  .kpi .head{margin-bottom:8px}
+  .kpi .lbl{min-height:0}
+  .kpi .two{margin-top:8px;padding-top:8px}
+  .zone{padding:16px 20px 14px}
+  .zrow{margin-bottom:20px}
+  .sec-h{margin-bottom:10px}
+  .card{padding:16px}
+  .evwrap{max-height:calc(100vh - 250px)}
+}

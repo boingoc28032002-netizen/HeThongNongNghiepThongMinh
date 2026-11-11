@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard Tưới nước thông minh</title>
+<script>
+/* Chua dang nhap thi chuyen sang login.html (chay truoc khi ve giao dien de khong bi nhay) */
+(function(){try{var s=JSON.parse(sessionStorage.getItem("irrigation_session")||localStorage.getItem("irrigation_session")||"null");if(!s||!s.user)throw 0;}catch(e){location.replace("login.html");}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css?v=3">
+<link rel="stylesheet" href="css/components.css?v=2">
+<link rel="stylesheet" href="css/charts.css?v=2">
+<link rel="stylesheet" href="css/responsive.css?v=2">
+</head>
+<body>
+
+<div class="app" id="top">
+  <aside class="nav">
+    <div class="nav-brand">
+      <span class="logo"><svg class="ic"><use href="#i-drop"/></svg></span>
+      <div><b>SMART IRRIGATION</b><small>IOT MONITORING</small></div>
+    </div>
+
+    <div class="nav-h">MENU CHÍNH</div>
+    <nav class="nav-list" aria-label="Menu chính">
+      <a class="nav-i active" href="#overview" data-view="overview" aria-current="page"><svg class="ic"><use href="#i-grid"/></svg>Tổng quan</a>
+      <a class="nav-i" href="#zones" data-view="zones"><svg class="ic"><use href="#i-globe"/></svg>Giám sát khu vực</a>
+      <a class="nav-i" href="#charts" data-view="charts"><svg class="ic"><use href="#i-chart"/></svg>Biểu đồ dữ liệu</a>
+      <a class="nav-i" href="#log" data-view="log"><svg class="ic"><use href="#i-clip"/></svg>Nhật ký hoạt động</a>
+      <a class="nav-i" href="#config" data-view="config"><svg class="ic"><use href="#i-cog"/></svg>Cấu hình hệ thống</a>
+    </nav>
+
+    <div class="nav-h nav-h2">HỆ THỐNG</div>
+    <div class="sys"><i class="sd"></i><span class="s-na">Chưa rõ trạng thái thiết bị</span><span class="s-on">Thiết bị đang hoạt động</span><span class="s-off">Thiết bị ngoại tuyến</span></div>
+
+    <div class="nav-user" id="pUser" title="Tài khoản đang đăng nhập">
+      <span class="av"><svg class="ic"><use href="#i-user"/></svg></span>
+      <div><b id="tUser">-</b><button class="logout" id="btnLogout" title="Đăng xuất" aria-label="Đăng xuất">Đăng xuất</button></div>
+    </div>
+  </aside>
+
+  <div class="content">
+    <header class="top">
+      <div>
+        <h1 id="pageTitle">Tổng quan hệ thống</h1>
+        <div class="sub">Dữ liệu mới nhất: <b id="tRun">Chưa có lần chạy</b></div>
+      </div>
+      <div class="top-r">
+        <span class="pill" id="pBroker"><span class="dot"></span><span id="tBroker">Đang nối broker</span></span>
+        <span class="pill" id="pDev"><span class="dot"></span><span id="tDev">Thiết bị: chưa rõ</span></span>
+        <button class="iconbtn" id="btnReload" title="Tải lại trang" aria-label="Tải lại trang"><svg class="ic"><use href="#i-refresh"/></svg></button>
+        <button class="iconbtn" id="btnFull" title="Toàn màn hình" aria-label="Toàn màn hình"><svg class="ic"><use href="#i-expand"/></svg></button>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="banner" id="banner"></div>
+
+      <section data-pages="overview" class="kpis" aria-label="Chỉ số chính">
+        <div class="card kpi live">
+          <div class="head"><span class="badge b-soil"><svg class="ic"><use href="#i-drop"/></svg></span><span class="tt">Độ ẩm đất trung bình</span></div>
+          <div class="big"><span id="kSoil">-</span><em class="u">%</em><i class="tri mid" id="kSoilTri"></i></div>
+          <div class="lbl" id="kSoilL">Chưa có dữ liệu</div>
+          <div class="two"><div><small>Thấp nhất</small><b id="kSoilMin">-</b></div><div><small>Cao nhất</small><b id="kSoilMax">-</b></div></div>
+        </div>
+        <div class="card kpi live">
+          <div class="head"><span class="badge b-temp"><svg class="ic"><use href="#i-therm"/></svg></span><span class="tt">Nhiệt độ môi trường</span></div>
+          <div class="big"><span id="kTemp">-</span><em class="u">°C</em></div>
+          <div class="lbl" id="kTempL">Chưa có dữ liệu</div>
+          <div class="two"><div><small>Thấp nhất</small><b id="kTempMin">-</b></div><div><small>Cao nhất</small><b id="kTempMax">-</b></div></div>
+        </div>
+        <div class="card kpi live">
+          <div class="head"><span class="badge b-light"><svg class="ic"><use href="#i-sun"/></svg></span><span class="tt">Cường độ ánh sáng</span></div>
+          <div class="big"><span id="kLight">-</span><em class="u">%</em></div>
+          <div class="lbl" id="kLightL">Cường độ hiện tại (thang 0-100)</div>
+          <div class="two"><div><small>Thấp nhất</small><b id="kLightMin">-</b></div><div><small>Cao nhất</small><b id="kLightMax">-</b></div></div>
+        </div>
+        <div class="card kpi live">
+          <div class="head"><span class="badge b-water"><svg class="ic"><use href="#i-tank"/></svg></span><span class="tt">Mực nước bể chứa</span></div>
+          <div class="big"><span id="kWater">-</span><em class="u">%</em><i class="tri up" id="kWaterTri"></i></div>
+          <div class="lbl" id="kWaterL">Chưa có dữ liệu</div>
+          <div class="two"><div><small>Ngưỡng chặn tưới</small><b>20</b></div><div><small>Ngưỡng phục hồi</small><b>25</b></div></div>
+        </div>
+      </section>
+
+      <section class="card ctl" id="ctl" data-pages="zones config">
+        <div class="ctl-row">
+          <div><h2 class="t">Điều khiển hệ thống</h2><div class="hint" id="ctlNote">Đang chờ thiết bị.</div></div>
+          <div class="seg" id="segMode" role="group" aria-label="Chế độ vận hành"><button data-m="auto" aria-pressed="false" disabled>Tự động</button><button data-m="manual" aria-pressed="false" disabled>Thủ công</button></div>
+          <button class="btn danger" id="btnStop" disabled>DỪNG KHẨN CẤP</button>
+        </div>
+        <div class="ctl-row">
+          <label>Bắt đầu tưới khi đất &lt; <input type="number" id="inStart" min="0" max="100" value="40"></label>
+          <label>Dừng khi đất ≥ <input type="number" id="inStop" min="0" max="100" value="60"></label>
+          <button class="btn" id="btnThr" disabled>Áp dụng ngưỡng</button>
+        </div>
+        <div id="ctlMsg" role="status" aria-live="polite"></div>
+      </section>
+
+      <section data-pages="overview zones" id="sec-zones" aria-labelledby="hZones">
+        <div class="sec-h"><div><h2 class="sec" id="hZones">Giám sát khu vực tưới</h2><p class="sub2">Trạng thái cảm biến và thiết bị theo từng vùng</p></div></div>
+        <div class="zones live" id="zones"></div>
+      </section>
+
+
+      <section data-pages="overview charts" id="sec-analysis" aria-labelledby="hAnalysis">
+        <div class="sec-h">
+          <div><h2 class="sec" id="hAnalysis">Phân tích dữ liệu</h2><p class="sub2">Biến động thông số môi trường theo thời gian</p></div>
+          <div class="sec-tools">
+            <label class="filter" for="selZone">Vùng
+              <select id="selZone"><option value="all">Tất cả</option><option value="0">Vùng 1</option><option value="1">Vùng 2</option><option value="2">Vùng 3</option></select></label>
+            <label class="filter" for="selRange">Phạm vi
+              <select id="selRange"><option value="60">60 bản tin gần nhất</option><option value="all">Toàn bộ lần chạy</option></select></label>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="tabs" role="tablist" id="tabsChart">
+              <button class="tab" role="tab" data-v="soil" aria-selected="true">Độ ẩm đất</button>
+              <button class="tab" role="tab" data-v="water" aria-selected="false">Mực nước</button>
+              <button class="tab" role="tab" data-v="light" aria-selected="false">Ánh sáng</button>
+              <button class="tab" role="tab" data-v="temp" aria-selected="false">Nhiệt độ</button>
+              <button class="tab" role="tab" data-v="combo" aria-selected="false">Nhiệt độ và đất</button>
+            </div>
+            <h2 class="t" id="chartTitle">Biến động độ ẩm đất</h2>
+            <div class="chartwrap" id="chartWrap"><svg viewBox="0 0 640 270" id="chart" role="img" aria-label="Biểu đồ biến động"></svg><div class="tip" id="tip"></div></div>
+            <div class="legend" id="chartLegend"></div>
+          </div>
+
+          <div class="card dev">
+            <h2 class="t">Thiết bị &amp; hoạt động</h2>
+            <div class="hint">Trạng thái vận hành hiện tại</div>
+            <div class="pumpbox">
+              <span class="badge b-pump"><svg class="ic"><use href="#i-pump"/></svg></span>
+              <div class="pb-t"><b>Máy bơm chính</b><small id="kPumpL">Chưa có dữ liệu</small></div>
+              <span class="onoff" id="kPump">-</span>
+            </div>
+            <div class="stats">
+              <div><small>Số lần tưới</small><b id="kCnt">0</b></div>
+              <div><small>Tổng thời gian bơm</small><b id="kDur">0 s</b></div>
+              <div><small>Tỷ lệ bơm chạy</small><b id="kDuty">-</b></div>
+              <div><small>Lần mất kết nối</small><b id="kDrops">0</b></div>
+              <div class="wide"><small>Cảnh báo nước thấp</small><b id="kWlow">0</b></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid2 even" data-pages="charts">
+        <section class="card">
+          <div class="tabs" role="tablist" id="tabsBar">
+            <button class="tab" role="tab" data-v="count" aria-selected="true">Số lần</button>
+            <button class="tab" role="tab" data-v="dur" aria-selected="false">Thời gian</button>
+            <button class="tab" role="tab" data-v="avg" aria-selected="false">Độ ẩm TB</button>
+          </div>
+          <h2 class="t" id="barTitle">Số lần tưới theo vùng</h2>
+          <div id="bars"></div>
+          <div class="hint" id="barHint"></div>
+        </section>
+
+        <section class="card">
+          <div class="tabs" role="tablist" id="tabsDonut">
+            <button class="tab" role="tab" data-v="zone" aria-selected="true">Theo vùng</button>
+            <button class="tab" role="tab" data-v="state" aria-selected="false">Theo trạng thái</button>
+          </div>
+          <h2 class="t" id="donutTitle">Tỉ trọng thời gian bơm theo vùng</h2>
+          <div class="donutbox"><svg viewBox="0 0 160 160" width="190" height="190" id="donut" role="img" aria-label="Biểu đồ tỉ trọng"></svg><div class="dleg" id="dleg"></div></div>
+        </section>
+      </div>
+
+      <section class="card" id="sec-log" data-pages="log">
+        <div class="tabs" role="tablist" id="tabsEv">
+          <button class="tab" role="tab" data-v="all" aria-selected="true">Tất cả</button>
+          <button class="tab" role="tab" data-v="cycle" aria-selected="false">Chu trình tưới</button>
+          <button class="tab" role="tab" data-v="env" aria-selected="false">Môi trường</button>
+          <button class="tab" role="tab" data-v="warn" aria-selected="false">Cảnh báo</button>
+        </div>
+        <h2 class="t">Nhật ký sự kiện</h2>
+        <div class="evwrap"><table><thead><tr><th>Thời điểm</th><th>Vùng</th><th>Sự kiện</th></tr></thead><tbody id="evBody"></tbody></table></div>
+      </section>
+
+      <footer data-pages="overview">
+        Thời gian t là giây mô phỏng của Proteus, không phải giờ thật. Số liệu thống kê được tính trong trình duyệt từ các bản tin nhận được. Bản tin gửi lúc mất kết nối không được gửi bù nên có thể thiếu.
+        Broker: <span id="wsUrl"></span> (đổi bằng <code>?ws=ws://địa-chỉ:9001</code>).
+      </footer>
+    </main>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
