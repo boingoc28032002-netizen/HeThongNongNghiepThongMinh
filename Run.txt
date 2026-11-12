@@ -1,0 +1,5 @@
+Trong cửa sổ Command Prompt đang mở (đã ở đúng thư mục smart-irrigation), gõ:
+
+py server\server.py --port 8090
+
+Sau đó mở trình duyệt vào http://localhost:8090/

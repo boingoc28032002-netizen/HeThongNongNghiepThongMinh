@@ -50,8 +50,9 @@ CONFIG = {
     "water_ok_at": 25.0,      # muc nuoc phuc hoi (tao tre, tranh nhap nhay)
     "valve_lead_s": 1.0,      # mo van truoc khi bat bom
     "valve_lag_s": 1.0,       # tat bom truoc, 1 s sau moi dong van
-    "max_run_s": 300.0,       # BOM chay lien tuc toi da 300 s (5 phut); cung la gioi han moi vung
-    "cooldown_s": 60.0,       # BOM nghi 60 s (1 phut) sau khi bi cat; cung la nghi toi thieu moi vung
+    "max_run_s": 300.0,       # MOI VUNG tuoi toi da 300 s (5 phut) tinh tu luc van cua vung do bat dau RUNNING
+    "cooldown_s": 60.0,       # moi vung nghi toi thieu 60 s (1 phut) sau khi bi cat roi moi duoc tuoi lai
+    "pump_max_run_s": 0.0,    # 0 = KHONG cat chung theo bom (moi vung tu dem gio rieng). >0 = bom chay lien tuc qua so giay nay thi cat het cac vung va nghi cooldown_s
     "max_parallel": 3,        # so vung duoc tuoi dong thoi (3 = vung nao kho la mo van ngay)
     "raw_max": 1023,
     # ---- Nhiet do / anh sang (4F). Tat ca la gia tri thu nghiem, co the chinh ----
@@ -86,7 +87,10 @@ def raw_to_pct(raw, raw_max=1023):
         return None
     if raw < 0 or raw > raw_max:
         return None
-    return raw * 100.0 / raw_max
+    # Lam tron 1 chu so thap phan (dung bang so hien tren dashboard). Neu khong lam tron:
+    # bien tro chinh 40% -> ADC = floor(0.4*1024) = 409 -> 409*100/1023 = 39.98 < 40 -> tuoi nham,
+    # trong khi dashboard hien 40.0.
+    return round(raw * 100.0 / raw_max, 1)
 
 
 def raw_to_temp(raw, vref=5.0, raw_max=1023):
@@ -303,8 +307,9 @@ class IrrigationController:
             for z in range(ZONES):
                 self.need[z] = bool(self.manual[z]) and not fault[z]
 
-        # 3a. Gioi han cua BOM (dung chung 3 vung): chay lien tuc du max_run_s thi cat het, nghi cooldown_s
-        if self.pump_since is not None and now - self.pump_since >= cfg["max_run_s"]:
+        # 3a. (tuy chon) Gioi han cua BOM dung chung: chi ap dung khi pump_max_run_s > 0.
+        #     Mac dinh TAT, vi neu bat thi vung mo van tre se bi cat som theo cac vung mo truoc (khong du max_run_s cua rieng no).
+        if cfg["pump_max_run_s"] > 0 and self.pump_since is not None and now - self.pump_since >= cfg["pump_max_run_s"]:
             for z in range(ZONES):
                 if self.zst[z] in (OPENING, RUNNING):
                     self._begin_closing(z, now, events, "max_run")
@@ -427,9 +432,10 @@ class IrrigationController:
 ENABLE_OUTPUTS = True    # False = chay kho (chi log). Chi doi True sau khi xem log chay kho.
 RELAY_ACTIVE_HIGH = True  # theo so do: GPIO HIGH -> BC547 dan -> cuon K1 hut -> NO dong
 
-TICK = 0.05
-SENSE_EVERY = 5          # doc ADC moi 10 tick (0.5 s mo phong)
-STATUS_EVERY = 3         # ghi dong trang thai moi 20 tick (1 s mo phong)
+TICK = 0.05              # chu ky vong lap MUC TIEU (giay). Thoi gian thuc te do bang dong ho, khong dem tick
+SENSE_S = 0.25           # doc ADC moi 0.25 s
+STATUS_S = 0.15          # ghi dong trang thai moi 0.15 s (dat 1.0 neu muon log thua hon)
+MIN_SLEEP = 0.005        # luon nhuong CPU toi thieu chut nay moi vong (de Proteus xu ly su kien)
 
 CH_SOIL = [0, 1, 2]       # RV1, RV2, RV3 -> vung 1, 2, 3
 CH_SOIL4 = 3              # RV4: chi ghi log, khong tham gia dieu khien
@@ -447,6 +453,60 @@ ALL_PINS = [("K1 bom", PUMP_PIN), ("K2 van1", VALVE_PINS[0]),
 
 LOG_FILE = None
 _applied = {}             # pin -> True/False (trang thai logic da ghi)
+
+
+class Clock:
+    """Dong ho thoi gian thuc (giay ke tu luc bat dau chay), khong phu thuoc so tick.
+
+    Truoc day now = n * TICK gia dinh moi vong lap dung 0.05 s; thuc te moi vong con ton thoi gian
+    doc SPI/LCD/GPIO/MQTT nen thoi gian he thong bi cham hon thoi gian that. Dong ho nay doc time.time()
+    (dong ho cua moi truong chay: Proteus VSM hoac may that) nen luon khop thoi gian that.
+    Dam bao khong bao gio chay lui. Neu time.time() khong chay (dung im), tu dong quay ve dem tick.
+    """
+
+    def __init__(self, tick=TICK):
+        self.tick = tick
+        self.t0 = time.time()
+        self.last = 0.0
+        self.n = 0
+        self.fallback = False
+        self.fb_base_n = 0
+        self.fb_base_t = 0.0
+
+    def now(self):
+        self.n += 1
+        if not self.fallback:
+            t = time.time() - self.t0
+            if t < self.last:
+                t = self.last           # chong chay lui (doi gio he thong...)
+            if self.n == 40 and t < self.tick * 5:
+                # 40 vong ma dong ho gan nhu khong nhuc nhich: khong tin duoc, dung dem tick
+                self.fallback = True
+                self.fb_base_n = self.n
+                self.fb_base_t = self.last
+                out("CANH BAO: time.time() khong chay, dung dem tick (thoi gian co the lech)")
+            else:
+                self.last = t
+                return t
+        self.last = self.fb_base_t + (self.n - self.fb_base_n) * self.tick
+        return self.last
+
+
+class Every:
+    """Dung de lam viec theo chu ky thoi gian thuc: due(now) tra True moi period giay (lan dau luon True)."""
+
+    def __init__(self, period):
+        self.period = period
+        self.next = None
+
+    def due(self, now):
+        if self.next is None or now >= self.next:
+            if self.next is None or now - self.next > self.period:
+                self.next = now + self.period     # tre qua nhieu thi khong don lai cac lan bo lo
+            else:
+                self.next += self.period
+            return True
+        return False
 
 
 def init_log():
@@ -851,9 +911,13 @@ def handle_cmd(now, ctrl, payload):
         return "CMD rejected: " + repr(e)
 
 
-def tick():
+def tick(t_start=None):
+    """Xu ly Proteus, roi ngu PHAN CON LAI cua chu ky TICK (da tru thoi gian lam viec cua vong lap)."""
     peripheral_loop()
-    time.sleep(TICK)
+    wait = TICK
+    if t_start is not None:
+        wait = TICK - (time.time() - t_start)
+    time.sleep(wait if wait > MIN_SLEEP else MIN_SLEEP)
 
 
 def fmt(v):
@@ -1254,10 +1318,15 @@ def run(max_ticks=None):
     last_dry = None
     off_since = None   # thoi diem mat MQTT (giay mo phong), None neu dang online
     n = 0
+    now = 0.0
+    clock = Clock(TICK)
+    ev_sense, ev_db = Every(SENSE_S), Every(DB_EVERY * TICK)
+    ev_pub, ev_status = Every(MQTT_PUB_EVERY * TICK), Every(STATUS_S)
     try:
         while max_ticks is None or n < max_ticks:
-            now = n * TICK
-            if n % SENSE_EVERY == 0:
+            t_start = time.time()
+            now = clock.now()
+            if ev_sense.due(now):
                 soil = [read_pct(spi, c) for c in CH_SOIL]
                 soil4 = read_pct(spi, CH_SOIL4)
                 light = read_pct(spi, CH_LIGHT)
@@ -1281,7 +1350,7 @@ def run(max_ticks=None):
                         now, outputs["pump"], outputs["valves"]))
                     last_dry = snap
 
-            if n % DB_EVERY == 0:
+            if ev_db.due(now):
                 db_reading(now, ctrl, soil, soil4, water, light, outputs)
 
             if mq is not None:
@@ -1303,7 +1372,7 @@ def run(max_ticks=None):
                         out("[%.2f] %s" % (now, _msg))
                         db_event(now, _msg)
                         mq.publish("events", event_json(now, _msg))
-                if n % MQTT_PUB_EVERY == 0:
+                if ev_pub.due(now):
                     mq.publish("readings", reading_json(
                         now, ctrl, soil, soil4, water, light, outputs), True)
 
@@ -1315,16 +1384,16 @@ def run(max_ticks=None):
                     out("UI LOI, tat giao dien (tuoi van chay): " + repr(e))
                     ui = None
 
-            if n % STATUS_EVERY == 0:
+            if ev_status.due(now):
                 out("[%.1f] state=%s zone=%s soil=%s ch3=%s water=%s light=%s temp=%s band=%s night=%d harsh=%d mqtt=%s" % (
                     now, ctrl.state, ctrl.zone,
                     [fmt(v) for v in soil], fmt(soil4), fmt(water), fmt(light),
                     fmt(temp), ctrl.temp_band, 1 if ctrl.night else 0, 1 if ctrl.harsh else 0,
                     "TAT" if mq is None else mq.state))
-            tick()
+            tick(t_start)
             n += 1
     finally:
-        ctrl.force_all_off(n * TICK)
+        ctrl.force_all_off(now)
         all_off()
         if ui is not None:
             try:
@@ -1334,7 +1403,7 @@ def run(max_ticks=None):
         out("Tat ca relay ve trang thai tat")
         if mq is not None:
             try:
-                mq.close(n * TICK)
+                mq.close(now)
             except Exception:
                 pass
         close_db()

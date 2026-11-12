@@ -8,6 +8,7 @@
 | Mô phỏng | `simulation/*.pdsprj` | Mạch Raspberry Pi 5, cảm biến (chiết áp mô phỏng độ ẩm, mực nước), relay bơm và 3 van |
 | Broker | Mosquitto | Chuyển bản tin giữa firmware và dashboard |
 | Dashboard | `dashboard/` | Hiển thị số liệu, thống kê, gửi lệnh điều khiển |
+| Máy chủ web | `server/` | Phục vụ dashboard, API tài khoản (đăng ký / đăng nhập / phiên), lưu SQLite `data/accounts.db` |
 
 ## Firmware (main.py)
 
@@ -40,3 +41,15 @@ broker ──▶ mqtt/client.js ──▶ state/handlers.js ──▶ state/stor
 
 Thống kê (số lần tưới, thời gian bơm, độ ẩm trung bình...) được tính ngay trong trình duyệt từ các bản tin nhận được.
 Bản tin gửi lúc dashboard mất kết nối không được gửi bù.
+
+## Máy chủ web và tài khoản (`server/`)
+
+```
+trình duyệt ── GET /index.html ──▶ server.py ── có cookie phiên hợp lệ? ── không ──▶ 302 login.html
+            ── POST /api/login | /api/register | /api/logout, GET /api/me | /api/status ──▶ accounts.py ──▶ data/accounts.db
+```
+
+- Bảng `users` (tên, băm mật khẩu, vai trò), `sessions` (băm token, hạn dùng), `rate` (đếm lần thử sai / đăng ký).
+- Chỉ thư mục `dashboard/` được phục vụ nên `data/` và mã máy chủ không tải về được.
+- POST yêu cầu `Content-Type: application/json` và kiểm tra `Origin` trùng `Host` (chống CSRF, kết hợp cookie `SameSite=Lax`).
+- Dashboard (MQTT qua WebSocket) vẫn nối thẳng tới Mosquitto, không đi qua máy chủ này.

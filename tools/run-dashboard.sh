@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-# Mo dashboard bang server tinh (can Python 3)
-cd "$(dirname "$0")/../dashboard" || exit 1
-echo "Dashboard: http://localhost:8080/"
-python3 -m http.server 8080
+# Chay may chu dashboard + tai khoan (can Python 3)
+cd "$(dirname "$0")/.." || exit 1
+exec python3 server/server.py --port 8080

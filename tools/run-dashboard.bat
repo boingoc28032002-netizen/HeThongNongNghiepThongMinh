@@ -1,5 +1,22 @@
+
 @echo off
-rem Mo dashboard bang server tinh (can Python). Dashboard dung ES modules nen khong mo bang double-click duoc.
-cd /d "%~dp0..\dashboard"
-start "" "http://localhost:8080/"
-python -m http.server 8080
+title Smart Irrigation Dashboard
+
+cd /d "%~dp0.."
+
+echo ========================================
+echo       SMART IRRIGATION DASHBOARD
+echo ========================================
+echo.
+
+echo Starting Dashboard Backend...
+echo URL: http://localhost:8082/
+echo.
+
+start "" "http://localhost:8082/"
+
+python server\server.py --host 127.0.0.1 --port 8082
+
+echo.
+echo Dashboard Backend has stopped.
+pause
